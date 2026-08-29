@@ -164,6 +164,45 @@ All three accept an `options` object to override their characters (background,
 still/searching/carrying glyphs, pheromone ramp, opinion palette) — see the
 JSDoc in `src/render.js` for the full list.
 
+### CLI
+
+```bash
+node bin/swarmsim.js --model ants --seed colony-1 --steps 50 --speed 80
+```
+
+Pipes `--steps` frames of a chosen model straight to the terminal, one
+rendered frame at a time, with a short delay (`--speed`, in milliseconds)
+between them so a run can actually be watched rather than just dumped. Every
+option has a default, so `node bin/swarmsim.js` alone runs a 30-frame boids
+simulation.
+
+```
+Usage:
+  swarmsim [options]
+
+Options:
+  --model <boids|ants|voting>  which simulation to run (default: boids)
+  --seed <string>              seed driving every random choice (default: swarmsim)
+  --steps <n>                  number of frames to advance and print (default: 30)
+  --speed <ms>                 delay between printed frames, 0 = no delay (default: 120)
+  --width <n>                  grid width (default: 40)
+  --height <n>                 grid height (default: 20)
+  --count <n>                  boids/ants to place (default: 12; unused for voting)
+  -h, --help                   print this message and exit
+```
+
+The initial state (agent positions, food placement, starting opinions) is
+itself derived deterministically from `--seed`, using a PRNG seeded
+separately from the per-frame one, so two runs with the same seed and flags
+print byte-for-byte identical output — useful for comparing rule changes or
+just re-watching a run that looked interesting.
+
+If `bin/swarmsim.js` is run in a real terminal (not piped to a file) with a
+nonzero `--speed`, it clears the screen between frames so each one draws in
+place; piped output instead prints every frame in sequence with no control
+characters, which is what makes it safe to capture in a test or redirect to
+a file.
+
 ## Status
 
 Built autonomously and gated on passing tests: every change here builds

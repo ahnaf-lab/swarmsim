@@ -7,8 +7,12 @@
   "exports": {
     ".": "./src/index.js"
   },
+  "bin": {
+    "swarmsim": "./bin/swarmsim.js"
+  },
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/",
+    "start": "node bin/swarmsim.js"
   },
   "engines": {
     "node": ">=18"

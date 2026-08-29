@@ -9,8 +9,9 @@ snapshot-test.
 Three models ship so far: boids flocking, ant-trail foraging, and voting
 consensus. Each is driven by its own stepper function, but every stepper
 shares the same shape — `step(state, rules, seed)` returns a brand new state
-one frame later, without touching its inputs. A terminal ASCII renderer is
-planned for a later milestone and is not part of this release.
+one frame later, without touching its inputs. A matching ASCII renderer turns
+any of those states into a fixed-width character grid, so a run can be
+watched in a terminal or captured as a golden-file snapshot at any frame.
 
 ## Install
 
@@ -124,6 +125,44 @@ amount of "stubbornness" that keeps the system from freezing prematurely.
 All three steppers share one interface — `step(state, rules, seed)` in, a
 new state out — so callers can advance any of them the same way and swap
 models without changing how the simulation loop is driven.
+
+### ASCII rendering
+
+```js
+import { step, DEFAULT_RULES, renderBoids, linesToString } from './src/index.js';
+
+let state = {
+  width: 20,
+  height: 10,
+  frame: 0,
+  boids: [{ x: 5, y: 5, vx: 0.6, vy: 0.1 }],
+};
+state = step(state, DEFAULT_RULES, 'my-simulation');
+
+console.log(linesToString(renderBoids(state)));
+```
+
+`renderBoids`, `renderAnts`, and `renderVoting` each turn one model's state
+into an array of strings — always exactly `state.height` rows of exactly
+`state.width` characters — so a frame can be printed straight to a terminal
+or diffed byte-for-byte against a saved golden file in a test. `render(state)`
+auto-detects which model a state belongs to (by looking for its `boids`,
+`ants`, or `opinions` field) and dispatches to the matching function, and
+`linesToString(lines)` joins rendered rows with `\n` for printing.
+
+- **Boids** draw as an arrow glyph (`→ ↘ ↓ ↙ ← ↖ ↑ ↗`) pointing in each
+  boid's current direction of travel, or `o` for one with ~zero speed.
+- **Ants** layer pheromone intensity (shaded `' .:-=+*#%@'`, scaled against
+  the strongest value in that frame), food remaining per cell (digits
+  `1`-`9`), the nest (`N`), and ants on top (`a` searching, `A` carrying
+  food).
+- **Voting** maps each cell's opinion index straight onto a palette
+  (`0-9A-Z` by default), so cells sharing an opinion always render the same
+  glyph.
+
+All three accept an `options` object to override their characters (background,
+still/searching/carrying glyphs, pheromone ramp, opinion palette) — see the
+JSDoc in `src/render.js` for the full list.
 
 ## Status
 

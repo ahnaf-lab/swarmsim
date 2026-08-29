@@ -164,6 +164,24 @@ All three accept an `options` object to override their characters (background,
 still/searching/carrying glyphs, pheromone ramp, opinion palette) — see the
 JSDoc in `src/render.js` for the full list.
 
+### Custom rule sets
+
+Every stepper's `rules` argument is a partial override merged over its
+defaults, so tuning an existing model needs no library changes:
+
+```js
+state = step(state, { ...DEFAULT_RULES, matchingFactor: 0.01, jitter: 0.1 }, seed);
+```
+
+For a rule set with its own shape — new fields, a different physical model —
+write a custom stepper that follows the same `(state, rules, seed) ->
+newState` contract as the built-ins. `examples/custom-rules.js` is a
+complete, tested example (`gravityStep`, agents pulled toward "gravity
+wells" instead of flocking) built to that contract; run it with
+`node examples/custom-rules.js`. See [`docs/API.md`](docs/API.md) for the
+full guide and the checklist a custom stepper needs to follow to stay
+deterministic and renderable.
+
 ### CLI
 
 ```bash
@@ -202,6 +220,12 @@ nonzero `--speed`, it clears the screen between frames so each one draws in
 place; piped output instead prints every frame in sequence with no control
 characters, which is what makes it safe to capture in a test or redirect to
 a file.
+
+## API reference
+
+[`docs/API.md`](docs/API.md) documents every exported function's parameters,
+return shape, and thrown errors, plus the full guide for writing a custom
+stepper referenced above.
 
 ## Status
 
